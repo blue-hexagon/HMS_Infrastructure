@@ -1,23 +1,31 @@
 #!/bin/bash
-
+#
+######################################################################################
+#----------------------------------- Input Data --------------------------------------
+######################################################################################
 ROLE=$1  # "lb" or "node"
 APP_REPO="https://github.com/sumitkumar1503/hospitalmanagement"
 APP_DIR="/var/www/hms"
 VENV_DIR="$APP_DIR/venv"
 DOMAIN="srv-lb01.local"
 LB_IPS=("192.168.10.15" "192.168.0.36")
+echo "[1/5]: Config data loaded."
 
-set -e
-
+######################################################################################
+#------------------------------------ Initialize ------------------------------------
+######################################################################################
 echo "Updating system..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y nginx git python3 python3-venv python3-pip
+echo "[2/5]: System initialized."
 
+######################################################################################
+#----------------------------------- Django HMS --------------------------------------
+######################################################################################
 echo "Cloning application..."
 sudo rm -rf $APP_DIR
 sudo git clone $APP_REPO $APP_DIR
 cd $APP_DIR
-
 echo "Creating virtual environment..."
 python3 -m venv $VENV_DIR
 source $VENV_DIR/bin/activate
@@ -27,10 +35,13 @@ if [ -f requirements.txt ]; then
     pip install -r requirements.txt
 fi
 pip install gunicorn django
-
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
+echo "[3/5]: Django HMS Configured."
 
+######################################################################################
+#---------------------------------- Nginx Config -------------------------------------
+######################################################################################
 if [ "$ROLE" == "lb" ]; then
     echo "Setting up Load Balancer NGINX config..."
     sudo tee /etc/nginx/nginx.conf > /dev/null <<EOF
@@ -91,8 +102,10 @@ server {
 EOF
 
     sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
-
-    echo "Setting up Gunicorn systemd service..."
+    echo "[4/5]: Nginx Configured."
+######################################################################################
+#--------------------------------- Gunicorn Config -----------------------------------
+######################################################################################
     sudo tee /etc/systemd/system/gunicorn.service > /dev/null <<EOF
 [Unit]
 Description=gunicorn daemon
@@ -107,7 +120,10 @@ ExecStart=$VENV_DIR/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 hospital.wsgi
 [Install]
 WantedBy=multi-user.target
 EOF
-
+    echo "[5/5]: Gunicorn daemon Configured."
+######################################################################################
+#------------------------------ Reload all Services ----------------------------------
+######################################################################################
     sudo systemctl daemon-reload
     sudo systemctl enable gunicorn
     sudo systemctl start gunicorn
@@ -116,4 +132,4 @@ fi
 echo "Testing and reloading NGINX..."
 sudo nginx -t && sudo systemctl reload nginx
 
-echo "$ROLE setup complete!"
+echo "[DONE:$ROLE]: Reloaded all services"
