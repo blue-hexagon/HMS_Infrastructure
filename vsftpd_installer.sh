@@ -84,6 +84,7 @@ for dept in "${DEPARTMENTS[@]}"; do
     sudo mkdir -p /srv/ftp/nhi/${dept}
     sudo chown root:sharedftp /srv/ftp/nhi/${dept}
     sudo chmod 2775 /srv/ftp/nhi/${dept}
+    echo "local_root=/srv/ftp/nhi/$dept" | sudo tee "/etc/vsftpd/user_config/$user" > /dev/null # TODO: Test det her.
 done
 sudo mkdir -p /srv/ftp/software
 sudo chown root:sharedftp /srv/ftp/software
@@ -134,6 +135,7 @@ data_connection_timeout=60
 listen=YES
 listen_ipv6=NO
 EOF
+
 echo "${COMPANY_NAME}_admin" > /etc/vsftpd/vsftpd.chroot
 sed -i '/^Subsystem/s/^/#/' /etc/ssh/sshd_config
 echo "[5/9]: VSFTPD Configured."
@@ -270,9 +272,7 @@ systemctl restart vsftpd || systemctl reload vsftpd
 systemctl restart ufw 
 systemctl restart nginx
 echo "[DONE]: Reloaded all services"
-echo "[DONE]: Reloading SSH to make sftp blocking take effect."
 sudo systemctl reload ssh
-
 
 ######################################################################################
 #----------------------------------- Fail2Ban ----------------------------------------
