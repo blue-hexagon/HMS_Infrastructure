@@ -12,7 +12,10 @@ if [ -z "$HOST_IP" ]; then
     HOST_IP="192.168.10.37"
 fi
 if [[ ${#DEPARTMENTS[@]} -eq 0 ]]; then
-    DEPARTMENTS=("research" "it")
+    IFS=',' read -ra DEPARTMENTS <<< "$DEPARTMENTS_STR"
+    for dep in "${DEPARTMENTS[@]}"; do
+        echo "Creating department: $dep"
+    done
 fi
 
 ftp_users=()
