@@ -2,35 +2,18 @@
 ######################################################################################
 #------------------------------------ Input Data ------------------------------------#
 ######################################################################################
-main() {
-  load_config
-  system_init
-  configure_ufw
-  create_ftp_users
-  configure_vsftpd
-  configure_vsftpd_ssl
-  setup_log_rotation
-  generate_nginx_ssl
-  configure_nginx
-  setup_cronjob
-  reload_services
-  setup_fail2ban
-}
-
-load_config () {
-    if [ -z "$COMPANY_NAME" ]; then
+if [ -z "$COMPANY_NAME" ]; then
     COMPANY_NAME="nhi"
-    fi
-    if [ -z "$COMPANY_DOMAIN" ]; then
+fi
+if [ -z "$COMPANY_DOMAIN" ]; then
     COMPANY_DOMAIN="nhi.it"
-    fi
-    if [ -z "$HOST_IP" ]; then
+fi
+if [ -z "$HOST_IP" ]; then
     HOST_IP="192.168.10.37"
-    fi
-    if [[ ${#DEPARTMENTS[@]} -eq 0 ]]; then
+fi
+if [[ ${#DEPARTMENTS[@]} -eq 0 ]]; then
     DEPARTMENTS=("research" "it")
-    fi
-}
+fi
 
 ftp_users=()
 ftp_passwords=()
