@@ -11,7 +11,7 @@ APP_REPO="https://github.com/blue-hexagon/django-rest-hms"
 APP_DIR="/var/www/hms"
 VENV_DIR="$APP_DIR/venv"
 DOMAIN="srv-lb01.local"
-LB_IPS=("192.168.10.21" "192.168.0.22")
+LB_IPS=("192.168.10.21" "192.168.10.22")
 echo "[1/5]: Config data loaded."
 
 ######################################################################################
@@ -19,7 +19,7 @@ echo "[1/5]: Config data loaded."
 ######################################################################################
 echo "Updating system..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y nginx git python3 python3-venv python3-pip
+sudo apt install -y nginx-full git python3 python3-venv python3-pip
 echo "[2/5]: System initialized."
 
 ######################################################################################
