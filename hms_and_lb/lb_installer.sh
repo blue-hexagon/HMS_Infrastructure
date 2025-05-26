@@ -41,36 +41,33 @@ echo "[3/5]: Django HMS Configured."
 #---------------------------------- Nginx Config ------------------------------------#
 ######################################################################################
 echo "Setting up Load Balancer NGINX config..."
+sudo tee /etc/nginx/conf.d/hms_upstream.conf > /dev/null <<EOF
+upstream web_frontend_pool {
+    ip_hash;
+    server ${LB_IPS[0]} max_fails=3 fail_timeout=15s;
+    server ${LB_IPS[1]} max_fails=3 fail_timeout=15s;
+}
+EOF
+
 sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
 
-events {}
-
-http {
-    upstream web_frontend_pool {
-        ip_hash;
-        server ${LB_IPS[0]} max_fails=3 fail_timeout=15s;
-        server ${LB_IPS[1]} max_fails=3 fail_timeout=15s;
+    location / {
+        proxy_pass http://web_frontend_pool;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    server {
-        listen 80;
-        server_name $DOMAIN;
+    location /static/ {
+        root $APP_DIR/staticfiles/;
+    }
 
-        location / {
-            proxy_pass http://web_frontend_pool;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-
-        location /static/ {
-            root $APP_DIR/staticfiles/;
-        }
-
-        location /media/ {
-            root $APP_DIR/mediafiles/;
-        }
+    location /media/ {
+        root $APP_DIR/mediafiles/;
     }
 }
 EOF
