@@ -89,6 +89,11 @@ echo "[5/5]: Gunicorn daemon Configured."
 ######################################################################################
 #------------------------------ Reload all Services ---------------------------------#
 ######################################################################################
+source $VENV_DIR/bin/activate
+python manage.py makemigrations
+python manage.py migrate
+exit
+
 sudo systemctl daemon-reload
 sudo systemctl enable gunicorn
 sudo systemctl start gunicorn
