@@ -1,13 +1,10 @@
 #!/bin/bash
 
-# apt install git
-# git clone https://github.com/blue-hexagon/HMS_Infrastructure
-# cd HMS_Infrastructure
-# chmod a+x init.sh
-
-sudo chmod ugo+rwx ./ftpes/installer.sh
-sudo chmod ugo+rwx ./hms_and_lb/hms_installer.sh
-sudo chmod ugo+rwx ./hms_and_lb/lb_installer.sh
+sudo chmod a+rwx ./ftpes/installer.sh
+sudo chmod a+rwx ./hms_and_lb/hms_installer.sh
+sudo chmod a+rwx ./hms_and_lb/lb_installer.sh
+sudo chmod a+rwx ./hms_and_lb/db_installer.sh
+sudo chmod a+rwx ./hms_and_lb/db_setup.sql
 
 if [[ -z "$1" ]]; then
     echo "Usage: $0 {lb|hms|ftpes|sethostname}"
@@ -21,12 +18,20 @@ export HOST_IP=$(ip -4 route get 1.1.1.1 | awk '{print $7}')
 
 if [[ "$1" == "lb" ]]; then
     sudo ./hms_and_lb/lb_installer.sh
+
 elif [[ "$1" == "hms" ]]; then
     sudo ./hms_and_lb/hms_installer.sh
+
+elif [[ "$1" == "db" ]]; then
+    sudo ./hms_and_lb/db_installer.sh
+
 elif [[ "$1" == "ftpes" ]]; then
     sudo ./ftpes/installer.sh
+
 elif [[ "$1" == "sethostname" ]]; then
     sudo hostnamectl set-hostname "${HOST_IP//./-}.${COMPANY_DOMAIN}"
+
 else
     echo "Invalid argument: $1"
+
 fi
