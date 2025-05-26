@@ -1,12 +1,7 @@
 #!/bin/bash
-if [ -z "$1" ]; then
-  echo "Usage: $0 {lb|hms}"
-  exit 1
-fi
 ######################################################################################
 #----------------------------------- Input Data -------------------------------------#
 ######################################################################################
-ROLE=$1  # "lb" or "hms"
 APP_REPO="https://github.com/blue-hexagon/django-rest-hms"
 APP_DIR="/var/www/hms"
 VENV_DIR="$APP_DIR/venv"
@@ -45,43 +40,10 @@ echo "[3/5]: Django HMS Configured."
 ######################################################################################
 #---------------------------------- Nginx Config ------------------------------------#
 ######################################################################################
-if [ "$ROLE" == "lb" ]; then
-    echo "Setting up Load Balancer NGINX config..."
-    sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
-http {
-    upstream web_frontend_pool {
-        ip_hash;
-        server ${LB_IPS[0]} max_fails=3 fail_timeout=15s;
-        server ${LB_IPS[1]} max_fails=3 fail_timeout=15s;
-    }
 
-    server {
-        listen 80;
-        server_name $DOMAIN;
+echo "Configuring backend node (NGINX + Gunicorn)..."
 
-        location / {
-            proxy_pass http://web_frontend_pool;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-        }
-
-        location /static/ {
-            root $APP_DIR/staticfiles/;
-        }
-
-        location /media/ {
-            root $APP_DIR/mediafiles/;
-        }
-    }
-}
-EOF
-    sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
-else
-    echo "Configuring backend node (NGINX + Gunicorn)..."
-
-    sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
+sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
 server {
     listen 80;
     server_name _;
@@ -104,12 +66,12 @@ server {
 }
 EOF
 
-    sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
-    echo "[4/5]: Nginx Configured."
+sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
+echo "[4/5]: Nginx Configured."
 ######################################################################################
 #--------------------------------- Gunicorn Config ----------------------------------#
 ######################################################################################
-    sudo tee /etc/systemd/system/gunicorn.service > /dev/null <<EOF
+sudo tee /etc/systemd/system/gunicorn.service > /dev/null <<EOF
 [Unit]
 Description=gunicorn daemon
 After=network.target
@@ -123,14 +85,13 @@ ExecStart=$VENV_DIR/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 hospital.wsgi
 [Install]
 WantedBy=multi-user.target
 EOF
-    echo "[5/5]: Gunicorn daemon Configured."
+echo "[5/5]: Gunicorn daemon Configured."
 ######################################################################################
 #------------------------------ Reload all Services ---------------------------------#
 ######################################################################################
-    sudo systemctl daemon-reload
-    sudo systemctl enable gunicorn
-    sudo systemctl start gunicorn
-fi
+sudo systemctl daemon-reload
+sudo systemctl enable gunicorn
+sudo systemctl start gunicorn
 
 echo "Testing and reloading NGINX..."
 sudo nginx -t && sudo systemctl reload nginx

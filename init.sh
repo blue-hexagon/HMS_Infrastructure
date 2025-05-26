@@ -25,7 +25,7 @@ elif [[ "$1" == "hms" ]]; then
 elif [[ "$1" == "ftpes" ]]; then
     sudo ./ftpes/installer.sh
 elif [[ "$1" == "sethostname" ]]; then
-    sudo hostnamectl set-hostname "${HOST_IP//./-}.${COMPANY_DOMAIN}.local"
+    sudo hostnamectl set-hostname "${HOST_IP//./-}.${COMPANY_DOMAIN}"
 else
     echo "Invalid argument: $1"
 fi
