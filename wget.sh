@@ -1,5 +1,6 @@
 #!/bin/bash
-# wget -qO- https://raw.githubusercontent.com/blue-hexagon/HMS_Infrastructure/refs/heads/master/wget.sh | bash
+# wget -qO- https://raw.githubusercontent.com/blue-hexagon/HMS_Infrastructure/refs/heads/master/wget.sh | sudo bash -s -- ARG
+# lb|db|ftpes|sethostname|hms
 
 apt install git
 set +x
