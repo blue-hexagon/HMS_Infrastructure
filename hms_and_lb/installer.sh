@@ -47,7 +47,7 @@ echo "[3/5]: Django HMS Configured."
 ######################################################################################
 if [ "$ROLE" == "lb" ]; then
     echo "Setting up Load Balancer NGINX config..."
-    sudo tee /etc/nginx/nginx.conf > /dev/null <<EOF
+    sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
 http {
     upstream web_frontend_pool {
         ip_hash;
@@ -77,7 +77,7 @@ http {
     }
 }
 EOF
-
+    sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
 else
     echo "Configuring backend node (NGINX + Gunicorn)..."
 
