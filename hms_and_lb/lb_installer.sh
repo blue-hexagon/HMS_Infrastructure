@@ -42,6 +42,9 @@ echo "[3/5]: Django HMS Configured."
 ######################################################################################
 echo "Setting up Load Balancer NGINX config..."
 sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
+
+events {}
+
 http {
     upstream web_frontend_pool {
         ip_hash;
