@@ -32,7 +32,7 @@ echo "Installing dependencies..."
 if [ -f requirements.txt ]; then
     pip install -r requirements.txt
 fi
-pip install gunicorn django
+pip install gunicorn django djangorestframework
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 echo "[3/5]: Django HMS Configured."
