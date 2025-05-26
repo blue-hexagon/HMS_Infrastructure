@@ -80,7 +80,7 @@ After=network.target
 User=www-data
 Group=www-data
 WorkingDirectory=$APP_DIR
-ExecStart=$VENV_DIR/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 hospital.wsgi:application
+ExecStart=$VENV_DIR/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 hms.wsgi:application
 
 [Install]
 WantedBy=multi-user.target

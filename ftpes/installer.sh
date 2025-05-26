@@ -9,7 +9,7 @@ if [ -z "$COMPANY_DOMAIN" ]; then
     COMPANY_DOMAIN="nhi.it"
 fi
 if [ -z "$HOST_IP" ]; then
-    HOST_IP="192.168.10.37"
+    HOST_IP="192.168.10.20"
 fi
 if [[ ${#DEPARTMENTS[@]} -eq 0 ]]; then
     IFS=',' read -ra DEPARTMENTS <<< "$DEPARTMENTS_STR"
