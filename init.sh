@@ -6,7 +6,8 @@
 # chmod a+x init.sh
 
 sudo chmod ugo+rwx ./ftpes/installer.sh
-sudo chmod ugo+rwx ./hms_and_lb/installer.sh
+sudo chmod ugo+rwx ./hms_and_lb/hms_installer.sh
+sudo chmod ugo+rwx ./hms_and_lb/lb_installer.sh
 
 if [[ -z "$1" ]]; then
     echo "Usage: $0 {lb|hms|ftpes|sethostname}"
@@ -19,9 +20,9 @@ export DEPARTMENTS_STR="labs,research,ledelse,hr,it,sikkerhed"
 export HOST_IP=$(ip -4 route get 1.1.1.1 | awk '{print $7}')
 
 if [[ "$1" == "lb" ]]; then
-    sudo ./hms_and_lb/installer.sh lb
+    sudo ./hms_and_lb/lb_installer.sh
 elif [[ "$1" == "hms" ]]; then
-    sudo ./hms_and_lb/installer.sh hms
+    sudo ./hms_and_lb/hms_installer.sh
 elif [[ "$1" == "ftpes" ]]; then
     sudo ./ftpes/installer.sh
 elif [[ "$1" == "sethostname" ]]; then
