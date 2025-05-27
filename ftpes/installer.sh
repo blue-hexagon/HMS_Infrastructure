@@ -149,7 +149,7 @@ echo "[5/9]: VSFTPD Configured."
 #---------------------------- Configure SSL for VSFTPD ------------------------------#
 ######################################################################################
 if [ ! -f /etc/vsftpd/vsftpd.pem ]; then
-	sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/vsftpd.pem -out /etc/vsftpd/vsftpd.pem
+	sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/vsftpd.pem -out /etc/vsftpd/vsftpd.pem -subj "/C=DK/ST=Denmark/L=Copenhagen/O=NBI/OU=IT Department/CN=ftp.nhi.it.local"
 fi
 systemctl restart vsftpd
 echo "[6/9]: SSL Configured for VSFTPD."
