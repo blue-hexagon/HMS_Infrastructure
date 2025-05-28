@@ -12,7 +12,7 @@ if [[ -z "$1" ]]; then
 fi
 export COMPANY_NAME="nhi"
 export COMPANY_TLD="it"
-export COMPANY_DOMAIN="${COMPANY_NAME}.${COMPANY_TLD}.local"
+export COMPANY_DOMAIN="${COMPANY_NAME}.${COMPANY_TLD}"
 export DEPARTMENTS_STR="labs,research,ledelse,hr,it,sikkerhed"
 export HOST_IP=$(ip -4 route get 1.1.1.1 | awk '{print $7}')
 
