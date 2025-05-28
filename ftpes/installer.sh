@@ -174,7 +174,8 @@ userlist_enable=YES
 ssl_enable=YES
 force_local_data_ssl=YES
 force_local_logins_ssl=YES
-###
+# YES, YES, YES! https://www.youtube.com/watch?v=7bkq9bySQXI 
+
 ssl_tlsv1=YES
 ssl_sslv2=NO
 ssl_sslv3=NO
@@ -184,9 +185,8 @@ require_cert=NO
 ssl_request_cert=YES
 require_ssl_reuse=NO
 strict_ssl_read_eof=NO
-###
 
-rsa_cert_file=/etc/vsftpd/vsftpd.pem
+rsa_cert_file=/etc/vsftpd/vsftpd.crt
 rsa_private_key_file=/etc/vsftpd/vsftpd.pem
 
 idle_session_timeout=300
@@ -297,6 +297,11 @@ done
 cat <<EOF | sudo tee -a /etc/nginx/sites-available/archive >/dev/null
     location ~ /\. {
         deny all;
+    }
+    
+    location = / {
+        alias /srv/ftp/nhi/index.html;
+        # Admin can access this.
     }
     
     location /software/ {
