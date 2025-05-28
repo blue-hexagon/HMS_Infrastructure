@@ -11,6 +11,10 @@ fi
 if [ -z "$HOST_IP" ]; then
     HOST_IP="192.168.10.20"
 fi
+if [[ -z "$DEPARTMENTS_STR" ]]; then
+    echo "DEPARTMENTS_STR is empty! Exiting."
+    exit 1
+fi
 if [[ ${#DEPARTMENTS[@]} -eq 0 ]]; then
     IFS=',' read -ra DEPARTMENTS <<< "$DEPARTMENTS_STR"
     for dep in "${DEPARTMENTS[@]}"; do
@@ -178,7 +182,7 @@ cat <<-EOF | sudo tee /etc/vsftpd.conf > /dev/null
     listen_ipv6=NO
 EOF
 
-echo "${COMPANY_NAME}_admin" > /etc/vsftpd/vsftpd.chroot
+# echo "${COMPANY_NAME}_admin" > /etc/vsftpd/vsftpd.chroot
 sed -i '/^Subsystem/s/^/#/' /etc/ssh/sshd_config # Removes SFTP access as it overrides vsftpd configuration and is a security issue.
 echo "[5/9]: VSFTPD Configured."
 ######################################################################################

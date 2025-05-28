@@ -22,16 +22,16 @@ if [[ ! -f /tmp/hostname_set.lock ]]; then
 fi
 
 if [[ "$1" == "lb" ]]; then
-    sudo ~/HMS_Infrastructure/hms_and_lb/lb_installer.sh
+    sudo -E ~/HMS_Infrastructure/hms_and_lb/lb_installer.sh
 
 elif [[ "$1" == "hms" ]]; then
-    sudo ~/HMS_Infrastructure/hms_and_lb/hms_installer.sh
+    sudo -E ~/HMS_Infrastructure/hms_and_lb/hms_installer.sh
 
 elif [[ "$1" == "db" ]]; then
-    sudo ~/HMS_Infrastructure/hms_and_lb/db_installer.sh
+    sudo -E ~/HMS_Infrastructure/hms_and_lb/db_installer.sh
 
 elif [[ "$1" == "ftpes" ]]; then
-    sudo ~/HMS_Infrastructure/ftpes/installer.sh
+    sudo -E ~/HMS_Infrastructure/ftpes/installer.sh
 
 else
     echo "Invalid argument: $1"
