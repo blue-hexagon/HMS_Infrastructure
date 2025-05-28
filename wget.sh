@@ -1,7 +1,4 @@
 #!/bin/bash
-# wget -qO- https://raw.githubusercontent.com/blue-hexagon/HMS_Infrastructure/refs/heads/master/wget.sh | sudo bash -s -- ftpes
-# lb|db|ftpes|sethostname|hms
-
 cd $HOME
 echo "@ ${HOME}"
 apt install git
