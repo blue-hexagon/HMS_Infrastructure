@@ -24,10 +24,11 @@ ftp_passwords=()
 for dept in "${DEPARTMENTS[@]}"; do
   ftp_users+=("${COMPANY_NAME}_${dept}_ro")
   ftp_users+=("${COMPANY_NAME}_${dept}_rw")
-  ftp_passwords+=("Kode1234!" "Kode1234!")
+  ftp_users+=("${COMPANY_NAME}_${dept}_external")
+  ftp_passwords+=("Kode1234!" "Kode1234!" "Kode1234!")
 done
 ftp_users+=("${COMPANY_NAME}_admin")
-ftp_passwords+=("Admin1234!")
+ftp_passwords+=("Kode1234!")
 ftp_users+=("${COMPANY_NAME}_ansat")
 ftp_passwords+=("Kode1234!")
 echo "[1/9]: Config data loaded."
@@ -67,13 +68,47 @@ touch /etc/vsftpd/user_list
 for i in "${!ftp_users[@]}"; do
     user="${ftp_users[$i]}"
     pass="${ftp_passwords[$i]}"
+    dept=$(echo "$user" | cut -d'_' -f2)
+
     id "${user}" &>/dev/null || sudo useradd -m "$user" -s /bin/bash 
     sudo usermod -aG sharedftp "$user"
     echo "$user:$pass" | sudo chpasswd
-    if [[ "$user" == *ro ]] || [[ "$user" == *ansat ]] || [[ "$user" == *admin ]]; then
+    # [RO, Ansat] Grant HTTP access by creating a local database for later use along with Nginx basic auth module.
+    if [[ "${user}" == *ro ]] || [[ "${user}" == *ansat ]]; then
         htpasswd -cb /etc/nginx/.htpasswd $user $pass
-    elif [[ "$user" == *rw ]] || [[ "$user" == *admin ]]; then
+    
+    # [RW, Admin, External] Grant FTP access.
+    elif [[ "${user}" == *rw ]] || [[ "${user}" == *admin ]] || [[ "${user}" == *external ]]; then
         grep -q "^${user}$" /etc/vsftpd/user_list || echo "${user}" >> /etc/vsftpd/user_list
+    fi
+
+    # [RO, RW] Custom VSFTPD config.
+    if [[ "$user" == *ro ]] || [[ "$user" == *rw ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" > /dev/null <<-EOF1
+        local_root=/srv/ftp/nhi/${dept}/
+        write_enable=YES
+EOF1
+
+    # [External] Custom VSFTPD config.
+    elif [[ "$user" == *external ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" > /dev/null <<-EOF2
+        local_root=/srv/ftp/nhi/${dept}/external/
+        write_enable=YES
+EOF2
+
+    # [Ansat] Custom VSFTPD config.
+    elif [[ "$user" == *ansat ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" > /dev/null <<-EOF3
+        local_root=/srv/ftp/nhi/all/software
+        write_enable=YES
+EOF3
+
+    # [Admin] Custom VSFTPD config.
+    elif [[ "$user" == *admin ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" > /dev/null <<-EOF4
+        local_root=/srv/ftp/nhi
+        write_enable=YES
+EOF4
     fi
 done
 echo "[4/9]: Users configured."
@@ -86,65 +121,66 @@ sudo chown root:sharedftp /srv/ftp/nhi
 sudo chmod 2775 /srv/ftp/nhi
 for dept in "${DEPARTMENTS[@]}"; do
     sudo mkdir -p /srv/ftp/nhi/${dept}
+    sudo mkdir -p /srv/ftp/nhi/${dept}/ro
+    sudo mkdir -p /srv/ftp/nhi/${dept}/rw
+    sudo mkdir -p /srv/ftp/nhi/${dept}/external
     sudo chown root:sharedftp /srv/ftp/nhi/${dept}
     sudo chmod 2775 /srv/ftp/nhi/${dept}
-    echo "local_root=/srv/ftp/nhi/$dept" | sudo tee "/etc/vsftpd/user_config/$user" > /dev/null # TODO: Test det her.
 done
 sudo mkdir -p /srv/ftp/software
 sudo chown root:sharedftp /srv/ftp/software
 sudo chmod 2775 /srv/ftp/software
 
-cat <<EOF | sudo tee /etc/vsftpd.conf > /dev/null
-ftpd_banner=Velkommen Til ${COMPANY_NAME^^}'s Sikre FTP Service!
+cat <<-EOF | sudo tee /etc/vsftpd.conf > /dev/null
+    ftpd_banner=Velkommen Til ${COMPANY_NAME^^}'s Sikre FTP Service!
 
-xferlog_enable=YES
-xferlog_file=/var/log/vsftpd.log
-log_ftp_protocol=YES
+    xferlog_enable=YES
+    xferlog_file=/var/log/vsftpd.log
+    log_ftp_protocol=YES
 
-local_enable=YES
-local_root=/srv/ftp/nhi
-allow_writeable_chroot=YES
-write_enable=YES
-dirlist_enable=YES
-anonymous_enable=NO
-user_config_dir=/etc/vsftpd/user_config
-chown_upload_mode=0775
+    local_enable=YES
+    local_root=/srv/ftp/nhi
+    allow_writeable_chroot=YES
+    write_enable=YES
+    dirlist_enable=YES
+    anonymous_enable=NO
+    user_config_dir=/etc/vsftpd/user_config
+    chown_upload_mode=0775
 
-chroot_local_user=YES
-chroot_list_enable=YES
-chroot_list_file=/etc/vsftpd/vsftpd.chroot
+    chroot_local_user=YES
+    chroot_list_enable=YES
+    chroot_list_file=/etc/vsftpd/vsftpd.chroot
 
-chown_uploads=YES
-chown_username=ftpuser
-file_open_mode=0664
-local_umask=002
+    chown_uploads=YES
+    chown_username=ftpuser
+    file_open_mode=0664
+    local_umask=002
 
-pasv_min_port=30000
-pasv_max_port=31000
-local_max_rate=1000000000
+    pasv_min_port=30000
+    pasv_max_port=31000
+    local_max_rate=1000000000
 
-userlist_file=/etc/vsftpd/user_list
-userlist_deny=NO
+    userlist_file=/etc/vsftpd/user_list
+    userlist_deny=NO
+    userlist_enable=YES
 
-ssl_enable=YES
-#force_local_data_ssl=YES
-#force_local_logins_ssl=YES
+    ssl_enable=YES
+    force_local_data_ssl=YES
+    force_local_logins_ssl=YES
 
-rsa_cert_file=/etc/vsftpd/vsftpd.pem
-rsa_private_key_file=/etc/vsftpd.pem
+    rsa_cert_file=/etc/vsftpd/vsftpd.pem
+    rsa_private_key_file=/etc/vsftpd.pem
 
-idle_session_timeout=300
-data_connection_timeout=60
+    idle_session_timeout=300
+    data_connection_timeout=60
 
-listen=YES
-listen_ipv6=NO
+    listen=YES
+    listen_ipv6=NO
 EOF
 
 echo "${COMPANY_NAME}_admin" > /etc/vsftpd/vsftpd.chroot
-sed -i '/^Subsystem/s/^/#/' /etc/ssh/sshd_config
+sed -i '/^Subsystem/s/^/#/' /etc/ssh/sshd_config # Removes SFTP access as it overrides vsftpd configuration and is a security issue.
 echo "[5/9]: VSFTPD Configured."
-### TODO: Lav vsftpd config for hver bruger, i hver department.
-### TODO: Tjek efter useradd flow, om brugerne bliver tilføjet korrekt til de rigtige gruppe.
 ######################################################################################
 #---------------------------- Configure SSL for VSFTPD ------------------------------#
 ######################################################################################
@@ -170,10 +206,10 @@ sudo tee /etc/logrotate.d/vsftpd > /dev/null <<EOF
 }
 EOF
 echo "[7/9]: Logrotation Configured for VSFTPD."
+
 ######################################################################################
 #-------------------------------- Nginx FTP SSL  ------------------------------------#
 ######################################################################################
-#TODO: Certifikatet skal eksporteres til DC CA
 touch /etc/ssl/openssl-ip.cnf
 sudo chown root:root /etc/ssl/openssl-ip.cnf
 sudo chmod 644 /etc/ssl/openssl-ip.cnf
