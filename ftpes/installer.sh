@@ -79,7 +79,7 @@ for i in "${!ftp_users[@]}"; do
     echo "$user:$pass" | sudo chpasswd
     # [RO, Ansat] Grant HTTP access by creating a local database for later use along with Nginx basic auth module.
     if [[ "${user}" == *ro ]] || [[ "${user}" == *ansat ]]; then
-        htpasswd -cb /etc/nginx/.htpasswd $user $pass
+        htpasswd -cb "/etc/nginx/.htpasswd_$dept" $user $pass
     
     # [RW, Admin, External] Grant FTP access.
     elif [[ "${user}" == *rw ]] || [[ "${user}" == *admin ]] || [[ "${user}" == *external ]]; then
@@ -268,7 +268,7 @@ cat <<EOF | sudo tee -a /etc/nginx/sites-available/archive > /dev/null
         charset utf-8;
         disable_symlinks if_not_owner;
         auth_basic "${COMPANY_NAME^^}";
-        auth_basic_user_file /etc/nginx/.htpasswd;
+        auth_basic_user_file /etc/nginx/.htpasswd_$dept;
     }
 EOF
 done
@@ -285,7 +285,7 @@ cat <<EOF | sudo tee -a /etc/nginx/sites-available/archive > /dev/null
         charset utf-8;
         disable_symlinks if_not_owner;
         auth_basic "${COMPANY_NAME^^}";
-        auth_basic_user_file /etc/nginx/.htpasswd;
+        auth_basic_user_file /etc/nginx/.htpasswd_ansat;
     }
 }
 EOF
