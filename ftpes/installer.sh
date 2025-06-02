@@ -308,7 +308,8 @@ for dept in "${DEPARTMENTS[@]}"; do
         disable_symlinks if_not_owner;
         auth_basic "${COMPANY_NAME^^}";
         auth_basic_user_file /etc/nginx/.htpasswd_$dept;
-        add_before_body /srv/ftp/nhi/autoindex.css;
+        add_before_body /autoindex.css;
+        add_after_body /banner.html;
     }
 EOF
 done

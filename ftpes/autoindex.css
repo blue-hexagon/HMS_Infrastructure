@@ -1,5 +1,4 @@
-/* autoindex.css */
-
+<style>
 body {
   background-color: #f8fafc;
   color: #1e293b;
@@ -32,3 +31,8 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+hr {
+    display: none;
+}
+</style>
