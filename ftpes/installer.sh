@@ -195,7 +195,7 @@ listen=YES
 listen_ipv6=NO
 EOF
 
-echo "${COMPANY_NAME}_admin" > /etc/vsftpd/vsftpd.chroot
+echo "${COMPANY_NAME}_admin" >/etc/vsftpd/vsftpd.chroot
 sed -i '/^Subsystem/s/^/#/' /etc/ssh/sshd_config # Removes SFTP access as it overrides vsftpd configuration and is a security issue.
 echo "[5/9]: VSFTPD Configured."
 ######################################################################################
@@ -299,10 +299,11 @@ cat <<EOF | sudo tee -a /etc/nginx/sites-available/archive >/dev/null
         deny all;
     }
     
-    location = / {
-        alias /srv/ftp/nhi/index.html;
-        # Admin can access this.
-    }
+    location / {
+         root /srv/ftp/nhi;
+         index index.html;
+     }
+
     
     location /software/ {
         alias /srv/ftp/software/;
