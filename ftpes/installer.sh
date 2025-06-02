@@ -80,38 +80,55 @@ for i in "${!ftp_users[@]}"; do
     # [RO, Ansat] Grant HTTP access by creating a local database for later use along with Nginx basic auth module.
     if [[ "${user}" == *ro ]] || [[ "${user}" == *ansat ]]; then
         htpasswd -cb "/etc/nginx/.htpasswd_$dept" $user $pass
-
+    fi
     # [RW, Admin, External] Grant FTP access.
-    elif [[ "${user}" == *rw ]] || [[ "${user}" == *admin ]] || [[ "${user}" == *external ]]; then
+    if [[ "${user}" == *rw ]] || [[ "${user}" == *admin ]] || [[ "${user}" == *external ]]; then
         grep -q "^${user}$" /etc/vsftpd/user_list || echo "${user}" >>/etc/vsftpd/user_list
     fi
 
-    # [RO, RW] Custom VSFTPD config.
-    if [[ "$user" == *ro ]] || [[ "$user" == *rw ]]; then
-        sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF1
+    # [RO] Custom VSFTPD config.
+    if [[ "$user" == *ro ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF1A
         local_root=/srv/ftp/nhi/${dept}/
+        dirlist_enable=YES
+        write_enable=NO
+        download_enable=YES
+EOF1A
+
+    # [RW] Custom VSFTPD config.
+    elif [[ "$user" == *rw ]]; then
+        sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF1B
+        local_root=/srv/ftp/nhi/${dept}/
+        dirlist_enable=YES
         write_enable=YES
-EOF1
+        download_enable=YES
+EOF1B
 
     # [External] Custom VSFTPD config.
     elif [[ "$user" == *external ]]; then
         sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF2
         local_root=/srv/ftp/nhi/${dept}/external/
+        dirlist_enable=NO
         write_enable=YES
+        download_enable=NO
 EOF2
 
     # [Ansat] Custom VSFTPD config.
     elif [[ "$user" == *ansat ]]; then
         sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF3
         local_root=/srv/ftp/nhi/all/software
-        write_enable=YES
+        write_enable=NO
+        dirlist_enable=YES
+        download_enable=YES
 EOF3
 
     # [Admin] Custom VSFTPD config.
     elif [[ "$user" == *admin ]]; then
         sudo tee "/etc/vsftpd/user_config/$user" >/dev/null <<-EOF4
         local_root=/srv/ftp/nhi
+        dirlist_enable=YES
         write_enable=YES
+        download_enable=YES
 EOF4
     fi
 done
@@ -291,6 +308,7 @@ for dept in "${DEPARTMENTS[@]}"; do
         disable_symlinks if_not_owner;
         auth_basic "${COMPANY_NAME^^}";
         auth_basic_user_file /etc/nginx/.htpasswd_$dept;
+        add_before_body /srv/ftp/nhi/autoindex.css;
     }
 EOF
 done
@@ -303,7 +321,6 @@ cat <<EOF | sudo tee -a /etc/nginx/sites-available/archive >/dev/null
          root /srv/ftp/nhi;
          index index.html;
      }
-
     
     location /software/ {
         alias /srv/ftp/software/;
