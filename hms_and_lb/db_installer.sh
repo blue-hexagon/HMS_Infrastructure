@@ -20,5 +20,3 @@ if [ "$ALLOW_REMOTE" = true ]; then
 
     sudo systemctl restart postgresql
 fi
-
-sudo -u postgres psql -f db_setup.sql

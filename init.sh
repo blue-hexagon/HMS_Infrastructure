@@ -29,12 +29,14 @@ elif [[ "$1" == "hms" ]]; then
 
 elif [[ "$1" == "db" ]]; then
     sudo -E ~/HMS_Infrastructure/hms_and_lb/db_installer.sh
+    sudo chmod a+r ~/HMS_Infrastructure/hms_and_lb/db_setup.sql
+    sudo cat /root/HMS_Infrastructure/hms_and_lb/db_setup.sql | sudo -u postgres psql
 
 elif [[ "$1" == "ftpes" ]]; then
     sudo -E ~/HMS_Infrastructure/ftpes/installer.sh
     sudo -E cp ~/HMS_Infrastructure/ftpes/index.html /srv/ftp/nhi/index.html
     sudo -E cp ~/HMS_Infrastructure/ftpes/autoindex.css /srv/ftp/nhi/autoindex.css
-    sudo -E cp ~/HMS_Infrastructure/ftpes/banner.html /srv/ftp/nhi/banner.html
+    sudo -E cp ~/HMS_Infrastructure/ftpes/banner.html /srv/ftp/nhi/banner.html  
 
 else
     echo "Invalid argument: $1"

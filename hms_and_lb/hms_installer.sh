@@ -5,7 +5,7 @@
 APP_REPO="https://github.com/blue-hexagon/django-rest-hms"
 APP_DIR="/var/www/hms"
 VENV_DIR="$APP_DIR/venv"
-DOMAIN="srv-lb01.local"
+DOMAIN="srv-lb01.nhi.it"
 LB_IPS=("192.168.10.21" "192.168.10.22")
 echo "[1/5]: Config data loaded."
 
@@ -45,11 +45,11 @@ echo "Configuring backend node (NGINX + Gunicorn)..."
 
 sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
 server {
-    listen 80;
+    listen 8000;
     server_name _;
 
     location / {
-        proxy_pass http://127.0.0.1:80;
+        proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -67,6 +67,7 @@ server {
 EOF
 
 sudo ln -sf /etc/nginx/sites-available/hms /etc/nginx/sites-enabled/hms
+sudo rm /etc/nginx/sites-enabled/default
 echo "[4/5]: Nginx Configured."
 ######################################################################################
 #--------------------------------- Gunicorn Config ----------------------------------#
