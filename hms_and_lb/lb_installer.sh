@@ -104,4 +104,18 @@ sudo rm /etc/nginx/sites-enabled/default
 echo "Testing and reloading NGINX..."
 sudo nginx -t && sudo systemctl reload nginx
 
+######################################################################################
+#---------------------------------- NFS Share ---------------------------------------#
+######################################################################################
+sudo mkdir -p /var/www/hms/media
+sudo chown www-data:www-data /var/www/hms/media
+
+sudo apt install nfs-kernel-server
+echo "/var/www/hms/media 192.168.10.0/24(rw,sync,no_subtree_check)" | sudo tee -a /etc/exports
+sudo exportfs -ra
+
+# Test mounting
+sudo umount /var/www/hms/media
+sudo mount -a
+
 echo "[DONE:$ROLE]: Reloaded all services"

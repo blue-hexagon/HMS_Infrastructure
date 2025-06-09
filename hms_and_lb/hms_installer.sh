@@ -58,12 +58,8 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
-    location /static/ {
-        root $APP_DIR/staticfiles/;
-    }
-
     location /media/ {
-        root $APP_DIR/mediafiles/;
+        root $APP_DIR/media/;
     }
 }
 EOF
@@ -103,5 +99,15 @@ sudo systemctl start gunicorn
 
 echo "Testing and reloading NGINX..."
 sudo nginx -t && sudo systemctl reload nginx
+
+######################################################################################
+#------------------------------ NFS Share Connect -----------------------------------#
+######################################################################################
+sudo apt install nfs-common
+sudo mkdir -p /var/www/hms/media
+sudo mount 192.168.10.27:/var/www/hms/media /var/www/hms/media
+ls -ld /var/www/hms/media # Test ownership is www-data
+echo "192.168.10.27:/var/www/hms/media /var/www/hms/media nfs rw,sync,hard,intr 0 0" >> /etc/fstab
+systemctl daemon-reload
 
 echo "[DONE:$ROLE]: Reloaded all services"
