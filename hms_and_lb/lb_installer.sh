@@ -38,11 +38,7 @@ python manage.py collectstatic --noinput
 echo "[3/5]: Django HMS Configured."
 
 ## TODO ##
-sudo openssl req -x509 -nodes -days 365 \
-  -newkey rsa:2048 \
-  -keyout /etc/ssl/private/nginx-selfsigned.key \
-  -out /etc/ssl/certs/nginx-selfsigned.crt \
-  -subj "/C=DK/ST=Denmark/L=Copenhagen/O=NHI/OU=IT/CN=hms.nhi.it"
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/C=DK/ST=Denmark/L=Copenhagen/O=NHI/OU=IT/CN=hms.nhi.it"
 
 sudo chmod 600 /etc/ssl/private/nginx-selfsigned.key
 sudo chown root:root /etc/ssl/private/nginx-selfsigned.key

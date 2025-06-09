@@ -32,9 +32,11 @@ echo "Installing dependencies..."
 if [ -f requirements.txt ]; then
     pip install -r requirements.txt
 fi
-pip install gunicorn django djangorestframework psycopg2-binary
+pip install gunicorn django djangorestframework django-cors-headers
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
+sudo apt install libpq-dev python3-dev
+pip install psycopg2
 echo "[3/5]: Django HMS Configured."
 
 ######################################################################################
@@ -45,7 +47,7 @@ echo "Configuring backend node (NGINX + Gunicorn)..."
 
 sudo tee /etc/nginx/sites-available/hms > /dev/null <<EOF
 server {
-    listen 8000;
+    listen 80;
     server_name _;
 
     location / {
