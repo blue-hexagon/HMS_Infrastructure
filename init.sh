@@ -7,7 +7,7 @@ sudo chmod a+rwx ./hms_and_lb/db_installer.sh
 sudo chmod a+rwx ./hms_and_lb/db_setup.sql
 
 if [[ -z "$1" ]]; then
-    echo "Usage: $0 {lb|hms|db|ftpes}"
+    echo "Usage: $0 {lb|hms|ollama|db|ftpes}"
     exit 1
 fi
 export COMPANY_NAME="nhi"
@@ -26,6 +26,9 @@ if [[ "$1" == "lb" ]]; then
 
 elif [[ "$1" == "hms" ]]; then
     sudo -E ~/HMS_Infrastructure/hms_and_lb/hms_installer.sh
+
+elif [[ "$1" == "ollama" ]]; then
+    sudo -E ~/HMS_Infrastructure/ollama/installer.sh
 
 elif [[ "$1" == "db" ]]; then
     sudo -E ~/HMS_Infrastructure/hms_and_lb/db_installer.sh
