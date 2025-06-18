@@ -218,9 +218,10 @@ echo "[5/9]: VSFTPD Configured."
 ######################################################################################
 #---------------------------- Configure SSL for VSFTPD ------------------------------#
 ######################################################################################
+PFX_PASSWORD="${PFX_PASSWORD:-changeme123}"
 if [ ! -f /etc/vsftpd/vsftpd.pem ]; then
     sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/vsftpd/vsftpd.pem -out /etc/vsftpd/vsftpd.crt -subj "/C=DK/ST=Denmark/L=Copenhagen/O=NHI/OU=IT Department/CN=ftp.${COMPANY_DOMAIN}"
-    openssl pkcs12 -export -out /srv/ftp/nhi/vsftpd.pfx -inkey /etc/vsftpd/vsftpd.pem -in /etc/vsftpd/vsftpd.crt
+    openssl pkcs12 -export -out /srv/ftp/nhi/vsftpd.pfx -inkey /etc/vsftpd/vsftpd.pem -in /etc/vsftpd/vsftpd.crt -passout pass:"$PFX_PASSWORD"
     # cat /etc/vsftpd/vsftpd.pem /etc/vsftpd/vsftpd.crt | sudo tee /etc/vsftpd/vsftpd.pem >/dev/null
 fi
 if [[ $(openssl x509 -noout -modulus -in /etc/vsftpd/vsftpd.crt | openssl md5) == $(openssl rsa -noout -modulus -in /etc/vsftpd/vsftpd.pem | openssl md5) ]]; then
