@@ -10,10 +10,16 @@ if [[ -z "$1" ]]; then
     echo "Usage: $0 {lb|hms|ollama|db|ftpes}"
     exit 1
 fi
-export COMPANY_NAME="nhi"
-export COMPANY_TLD="it"
-export COMPANY_DOMAIN="${COMPANY_NAME}.${COMPANY_TLD}"
-export DEPARTMENTS_STR="labs,research,ledelse,hr,it,sikkerhed"
+COMPANY_NAME="starvalley"
+COMPANY_TLD="org"
+COMPANY_DOMAIN="${COMPANY_NAME}.${COMPANY_TLD}"
+DEPARTMENTS_STR="emergency,icu,surgery,radiology,labs,pharmacy,research,management,hr,it,security,rehab,transport,nutrition,geriatrics"
+
+export COMPANY_NAME
+export COMPANY_TLD
+export COMPANY_DOMAIN
+export DEPARTMENTS_STR
+
 export HOST_IP=$(ip -4 route get 1.1.1.1 | awk '{print $7}')
 
 if [[ ! -f /tmp/hostname_set.lock ]]; then
